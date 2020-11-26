@@ -1,0 +1,43 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Reza Firouzi">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/entry-style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Login</title>
+</head>
+
+<body>
+    <div id="container-login">
+        <div id="title">
+            <i class="material-icons lock">lock</i> Login
+        </div>
+        <form>
+            <div class="input">
+                <div class="input-addon">
+                    <i class="material-icons">account_circle</i>
+                </div>
+                <input placeholder="Username" type="text" required class="validate">
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="input">
+                <div class="input-addon">
+                    <i class="material-icons">vpn_key</i>
+                </div>
+                <input placeholder="Password" type="password" required class="validate">
+            </div>
+            <input class="submit" type="submit" value="Log In" />
+        </form>
+
+        <div class="forgot-password">
+            <a href="forgot-password.ejs">Forgot your password?</a>
+        </div>
+        <div class="register login-register">
+            Don't have an account yet?
+            <a href="register.ejs"><button id="register-link">Register here</button></a>
+        </div>
+    </div>
+</body>
+</html>
