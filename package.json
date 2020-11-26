@@ -1,0 +1,41 @@
+{
+  "name": "awsome-chat-application",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node config/server.js",
+    "server": "nodemon config/server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "moment": "^2.29.1",
+    "morgan": "~1.9.1",
+    "socket.io": "^3.0.3"
+  },
+  "description": "Awsome chat application with mongodb & node.js",
+  "main": "server.js",
+  "bin": {
+    "awsome-chat-application": "server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "keywords": [
+    "mongodb",
+    "nodejs",
+    "serverside",
+    "express",
+    "socket",
+    "io",
+    "ejs",
+    "web",
+    "chat",
+    "chatroom"
+  ],
+  "author": "Reza Firouzi",
+  "license": "ISC"
+}
