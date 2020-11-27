@@ -18,7 +18,7 @@
                 <div class="input-addon">
                     <i class="material-icons">person</i>
                 </div>
-                <input placeholder="First name" type="text" required class="validate">
+                <input placeholder="First name" type="text" class="validate" required maxlength="15">
             </div>
             <div class="clearfix"></div>
 
@@ -26,7 +26,7 @@
                 <div class="input-addon">
                     <i class="material-icons">person</i>
                 </div>
-                <input placeholder="Last name" type="text" required class="validate">
+                <input placeholder="Last name" type="text" class="validate" required maxlength="15">
             </div>
             <div class="clearfix"></div>
 
@@ -42,7 +42,7 @@
                 <div class="input-addon">
                     <i class="material-icons">account_circle</i>
                 </div>
-                <input placeholder="Username" type="text" required class="validate">
+                <input placeholder="Username" type="text" class="validate" required minlength="5">
             </div>
             <div class="clearfix"></div>
 
@@ -57,8 +57,47 @@
         </form>
         <div class="register">
             Do you already have an account?
-            <a href="login.html"><button id="register-link">Log In</button></a>
+            <a href="/login"><button id="register-link">Log In</button></a>
         </div>
     </div>
+
+<script>
+    const userInputs = document.querySelectorAll('.validate');
+    const submit = document.querySelector('.submit');
+    const login = document.getElementById('register-link');
+
+    submit.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('Button is clicked!');
+        const newUser = {
+            first_name: userInputs[0].value,
+            last_name: userInputs[1].value,
+            email: userInputs[2].value,
+            username: userInputs[3].value,
+            password: userInputs[4].value
+        }
+        fetch('/register', {
+            method: "post",
+            body: JSON.stringify(newUser),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            return response.json();
+        }).then(jsonResponse => {
+            if (jsonResponse.ok && jsonResponse.n) {
+                resetInputs();
+                alert('Registration Successful');
+                login.click();
+            } else {
+                alert('Registration failed! Try again.')
+            }
+        });
+    });
+
+    function resetInputs() {
+        userInputs.forEach(input => input.value = '');
+    }
+</script>
 </body>
 </html>

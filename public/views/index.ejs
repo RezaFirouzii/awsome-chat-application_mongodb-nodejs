@@ -22,7 +22,9 @@
 						</header>
 						<footer>
 							<ul class="icons">
-								<li><i class="icon brands material-icons">login</i></li>
+								<li>
+									<a href="/login"><i class="icon brands material-icons">login</i></a>
+								</li>
 							</ul>
 						</footer>
 					</section>
@@ -37,11 +39,6 @@
 					window.addEventListener('load', function() { document.body.className = document.body.className.replace(/\bis-preload\b/, ''); });
 					document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
 				}
-
-				const login = document.querySelector('.icon');
-				login.addEventListener('click', e => {
-					console.log('Login button clicked!');
-				});
 			</script>
 	</body>
 </html>
