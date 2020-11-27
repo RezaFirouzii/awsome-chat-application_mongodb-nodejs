@@ -9,10 +9,11 @@ const logger = require('morgan');
 const debug = require('debug')('awsome-chat-application:server');
 const http = require('http');
 const socket = require('socket.io');
-
-const indexRouter = require('../routes/index');
+const db = require('./db');
 
 const app = express();
+
+const indexRouter = require('../routes/index');
 
 // view engine setup
 app.set('views', path.join(__dirname, '../public/views'));
@@ -50,10 +51,22 @@ app.set('port', port);
 const server = http.createServer(app);
 
 // Listen on provided port, on all network interfaces.
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-console.log('The server is running on port: ' + port);
+/**
+ * if and only if database connection is successful.
+ */
+
+db.connect(err => {
+  if (err) {
+    console.log('Unable to connect to mongodb server\n', err);
+    process.exit(1);
+  } else {
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+    console.log(`Running on PORT ${port}...`);
+    console.log(`Mongodb connection on PORT 27017`);
+  }
+});
 
 // Creating the io stream
 const io = socket(server);
