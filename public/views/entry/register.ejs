@@ -26,7 +26,7 @@
                 <div class="input-addon">
                     <i class="material-icons">person</i>
                 </div>
-                <input placeholder="Last name" type="text" class="validate" required maxlength="15">
+                <input placeholder="Last name" type="text" class="validate" required maxlength="25">
             </div>
             <div class="clearfix"></div>
 
@@ -90,13 +90,15 @@
                 alert('Registration Successful');
                 login.click();
             } else {
-                alert('Registration failed! Try again.')
+                alert(`Registration failed!\nReason: ${jsonResponse.reason}`);
             }
         });
     });
 
     function resetInputs() {
-        userInputs.forEach(input => input.value = '');
+        userInputs.forEach(input => {
+            input.value = '';
+        });
     }
 </script>
 </body>
