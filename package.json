@@ -7,15 +7,19 @@
     "server": "nodemon config/server.js"
   },
   "dependencies": {
+    "connect-redis": "^5.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
+    "express-session": "^1.17.1",
     "http-errors": "~1.6.3",
     "moment": "^2.29.1",
     "mongodb": "^3.6.3",
     "morgan": "~1.9.1",
     "nodemailer": "^6.4.16",
+    "redis": "^3.0.2",
+    "redis-server": "^1.2.2",
     "socket.io": "^3.0.3"
   },
   "description": "Awsome chat application with mongodb & node.js",

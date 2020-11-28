@@ -5,6 +5,10 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const redis = require('redis');
+const redisStore = require('connect-redis')(session);
+const client  = redis.createClient();
 const logger = require('morgan');
 const debug = require('debug')('awsome-chat-application:server');
 const http = require('http');
@@ -17,21 +21,30 @@ const indexRouter = require('../routes/index');
 const loginRouter = require('../routes/entry-routes/login');
 const registerRouter = require('../routes/entry-routes/register');
 const forgotPasswordRouter = require('../routes/entry-routes/forgot-password');
+const verificationRouter = require('../routes/entry-routes/verification');
 
 // view engine setup
 app.set('views', path.join(__dirname, '../public/views'));
 app.set('view engine', 'ejs');
+app.set('trust proxy', 1);
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(cookieParser());
+app.use(session({
+  secret: "secret keyword",
+  store: new redisStore({ host: 'localhost', port: 6379, client: client, ttl : 260 }),
+  resave: false,
+  saveUninitialized: false
+}));
 
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/register', registerRouter);
 app.use('/forgot-password', forgotPasswordRouter);
+app.use('/verification', verificationRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -71,6 +84,7 @@ db.connect(err => {
     server.on('listening', onListening);
     console.log(`Running on PORT ${port}...`);
     console.log(`Mongodb connection on PORT 27017`);
+    console.log('Redis server connection on PORT 6379');
   }
 });
 
