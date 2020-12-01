@@ -39,5 +39,32 @@
             <a href="/register"><button id="register-link">Register here</button></a>
         </div>
     </div>
+<script>
+    const userInputs = document.querySelectorAll('.validate');
+    const username = userInputs[0];
+    const password = userInputs[1];
+    const submit = document.querySelector('.submit');
+
+    submit.addEventListener('click', e => {
+        e.preventDefault();
+        fetch('/login', {
+            method: 'post',
+            body: JSON.stringify({
+                username: username.value,
+                password: password.value
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            return response.json();
+        }).then(jsonResponse => {
+            if (jsonResponse.ok)
+                window.location.href = ''; // chat route
+            else
+                alert(jsonResponse.description);
+        });
+    });
+</script>
 </body>
 </html>
