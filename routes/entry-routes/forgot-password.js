@@ -25,23 +25,20 @@ router.post('/', (req, res) => {
             req.session.user = user;
             req.session.auth = code;
             res.writeHead(301, {
-                Location: 'http://localhost:3000/verification?status=sent&verified=false'
+                Location: 'http://localhost:3000/verification'
             });
+            res.end();
+        } else {
+            const message = `No user found with the email: ${req.body.email}!`;
+            res.type('html');
+            res.write(
+                `<body style="background-color: #1D1F20; margin: 200px auto; text-align: center">` +
+                `<h2 style="color: whitesmoke">${message}</h2>` +
+                `<script>setTimeout(() => window.location.href = "/forgot-password", 5000)</script></body>`
+            );
             res.end();
         }
     });
-});
-
-/* POST request for code verification */
-router.post('/', (req, res) => {
-    if (req.session.code === req.body.code) {
-        delete req.session.auth;
-    } else {
-        res.json({
-            ok: 0,
-            reason: 'Wrong code!\nEnter the code sent to your email.'
-        });
-    }
 });
 
 function sendEmail(user) {

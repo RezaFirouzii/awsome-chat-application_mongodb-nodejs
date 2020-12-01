@@ -14,13 +14,13 @@
         <i class="material-icons lock">fingerprint</i> Verification
     </div>
 
-    <form>
+    <form action="/verification" method="post">
         <p>A code has been sent to your email</p>
         <div class="input">
             <div class="input-addon">
                 <i class="material-icons">beenhere</i>
             </div>
-            <input placeholder="Enter the code..." type="text" required class="validate">
+            <input placeholder="Enter the code..." name="code" type="text" required class="validate">
         </div>
         <input class="submit" type="submit" value="Verify" />
     </form>
@@ -29,27 +29,5 @@
         <a href="/login"><button id="register-link">Log In</button></a>
     </div>
 </div>
-<script>
-    const userInput = document.querySelector('.validate');
-    const verify = document.querySelector('.submit');
-
-    verify.addEventListener('click', e => {
-        e.preventDefault();
-        fetch('/', {
-            method: 'post',
-            body: JSON.stringify({
-                code: userInput.value
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
-            return response.json();
-        }).then(jsonResponse => {
-
-        });
-    });
-
-</script>
 </body>
 </html>
