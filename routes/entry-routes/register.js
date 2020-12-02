@@ -11,6 +11,8 @@ router.get('/', function (req, res) {
 /* POST register form */
 router.post('/', (req, res) => {
 
+    // Adding groups field
+    req.body.groups = "";
     let endOfResponse = false;
 
     const validateObject = validate(req);
@@ -52,8 +54,8 @@ router.post('/', (req, res) => {
 
 function validate(req) {
 
-    req.body.email.toLowerCase();
-    req.body.username.toLowerCase();
+    req.body.email = req.body.email.toLowerCase();
+    req.body.username = req.body.username.toLowerCase();
 
     if (!(req.body.email.includes('@') && req.body.email.includes('.')
         && req.body.email.indexOf('@') < req.body.email.lastIndexOf('.'))) {

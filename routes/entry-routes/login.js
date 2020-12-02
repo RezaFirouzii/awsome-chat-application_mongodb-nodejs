@@ -6,7 +6,12 @@ const usersCollection = '_users';
 /* GET login page. */
 router.get('/', function (req, res, next) {
     if (req.session.valid) {
-        console.log('Ready to enter the chat!'); // Redirection to chat page
+        // Redirection to chat page
+        res.writeHead(301, {
+            Location: 'http://localhost:3000/chat'
+        });
+        res.end();
+        return;
     } else req.session.destroy(err => {
         if (err) console.log(err);
     });
@@ -15,7 +20,10 @@ router.get('/', function (req, res, next) {
 
 /* POST login request */
 router.post('/', (req, res) => {
-    console.log(req.body)
+
+    req.body.username = req.body.username[0] === '@'
+        ? req.body.username : "@" + req.body.username;
+
     db.getDB().collection(usersCollection).find(req.body).toArray((err, documents) => {
         if (err) console.log(err);
         else if (documents.length) {
