@@ -5,7 +5,7 @@ const usersCollection = '_users';
 
 /* GET login page. */
 router.get('/', function (req, res, next) {
-    if (req.session.valid) {
+    if (req.session.hasOwnProperty('valid')) {
         // Redirection to chat page
         res.writeHead(301, {
             Location: 'http://localhost:3000/chat'

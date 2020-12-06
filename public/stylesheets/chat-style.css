@@ -123,11 +123,8 @@ body, html {
 
 .groups li:hover {
     background-color: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
 }
-/*
-.active {
-    background-color: rgba(41, 83, 221, 0.63);
-}*/
 
 .user {
     font-size: 17px !important;
@@ -241,6 +238,13 @@ body, html {
 .msg_admin {
     position: absolute;
     right: 5px;
+    top: -25px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.user_admin {
+    position: absolute;
+    left: 5px;
     top: -25px;
     color: rgba(255, 255, 255, 0.5);
 }
