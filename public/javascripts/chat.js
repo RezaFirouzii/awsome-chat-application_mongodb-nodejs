@@ -2,50 +2,86 @@ import {
     getChatBoxTemplate,
     getGroupHeaderTemplate,
     getGroupBodyTemplate,
-    getGroupFooterTemplate
+    getGroupFooterTemplate,
+    getMessageTemplate
 } from "./script.js";
 
-_init();
+const socket = io();
 
-function _init() {
+/* Fetch API for rendering Info */
+fetch('/chat/render').then(response => {
+    return response.json();
+}).then(data => {
+    // Adding chat boxes for each group
+    data.user.groups.forEach(group => {
+        const groupsList = document.querySelector('.groups');
+        const chatBox = document.createElement('li');
+        chatBox.innerHTML = getChatBoxTemplate(group.name/*, group.logo, groupMessages[totalMessages - 1]*/);
+        groupsList.appendChild(chatBox);
 
-    /* Fetch API for rendering Info */
-    fetch('/chat/render').then(response => {
-        return response.json();
-    }).then(data => {
-        // Adding chat boxes for each group
-        data.user.groups.forEach(group => {
-            // const groupMessages = group.messages;
-            // const totalMessages = groupMessages.length;
+        const info = {
+            first_name: data.user.first_name,
+            last_name: data.user.last_name,
+            username: data.user.username
+        }
 
-            const groupsList = document.querySelector('.groups');
-            const chatBox = document.createElement('li');
-            chatBox.innerHTML = getChatBoxTemplate(group.name/*, group.logo, groupMessages[totalMessages - 1]*/);
-            groupsList.appendChild(chatBox);
+        // Listener for each chat box
+        const chatPanel = document.getElementById('chat_panel');
+        const chatCard = document.createElement('div');
+        chatCard.classList.add('card');
+        group.visited = false;
+        chatBox.addEventListener('click', e => {
+            e.preventDefault();
+            if (!group.visited) {
+                group.visited = true;
+                const header = getGroupHeaderTemplate(group.name, group.size);
+                const body = getGroupBodyTemplate(data.user, group.admin, group.messages);
+                const footer = getGroupFooterTemplate();
+                group.chatCard = { header, body, footer };
+                chatCard.append(header, body, footer);
+            }
 
-            // Listener for each chat box
-            const chatPanel = document.getElementById('chat_panel');
-            group.visited = false;
-            chatBox.addEventListener('click', e => {
-                e.preventDefault();
-                if (!group.visited) {
-                    group.visited = false;
-                    const chatCard = document.createElement('div');
-                    chatCard.classList.add('card');
-                    const groupHeader = getGroupHeaderTemplate(group.name, group.size/*, group.logo, group online members (using sockets)*/);
-                    const groupBody = getGroupBodyTemplate(data.user, group.admin, group.messages);
-                    const groupFooter = getGroupFooterTemplate();
-                    chatCard.append(groupHeader, groupBody, groupFooter);
-                    chatPanel.appendChild(chatCard);
-                }
+            socket.emit('groupSelection', info, group);
+            socket.on('online', onlineUsers => {
+                console.log(onlineUsers);
+                group.chatCard.header = getGroupHeaderTemplate(group.name, group.size, onlineUsers);
+                chatCard.innerHTML = '';
+                chatCard.append(group.chatCard.header, group.chatCard.body, group.chatCard.footer);
             });
+
+            chatPanel.innerHTML = '';
+            chatPanel.appendChild(chatCard);
+
+            // send button listener
+            const sendBtn = document.querySelector('.send_btn');
+            const typeMsg = document.querySelector('.type_msg');
+            sendBtn.addEventListener('click', e => {
+                e.preventDefault();
+                if (typeMsg.value === '') return;
+                const message = {
+                    owner: {
+                        name: data.user.first_name,
+                        username: data.user.username
+                    },
+                    message: typeMsg.value,
+                    date: "Monday",
+                    time: "22:00 PM"
+                }
+                socket.emit('output', group.admin, message, group.id);
+                typeMsg.value = '';
+            });
+            chatPanel.scrollTop = chatPanel.scrollHeight;
+        });
+        socket.on('input', (admin, message) => {
+            const messageTemplate = getMessageTemplate(data.user, admin, message);
+            group.chatCard.body.appendChild(messageTemplate);
         });
     });
+});
 
-    /* New group listener */
-    const newGroupBtn = document.querySelector('.btn');
-    newGroupBtn.addEventListener('click', e => {
-        e.preventDefault();
-        window.location.href = '/chat/add-group';
-    });
-}
+/* New group listener */
+const newGroupBtn = document.querySelector('.btn');
+newGroupBtn.addEventListener('click', e => {
+    e.preventDefault();
+    window.location.href = '/chat/add-group';
+});

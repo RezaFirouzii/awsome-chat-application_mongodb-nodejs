@@ -5,10 +5,16 @@ const usersCollection = '_users';
 
 /* GET login page. */
 router.get('/', function (req, res, next) {
-    if (req.session.hasOwnProperty('valid')) {
+    if (req.session.valid !== undefined) {
         // Redirection to chat page
+        const user = req.session.user;
+        const info = {
+            name: user.first_name,
+            username: user.username,
+            groups: user.groups.split(',')
+        }
         res.writeHead(301, {
-            Location: 'http://localhost:3000/chat'
+            Location: `http://localhost:3000/chat`
         });
         res.end();
         return;
@@ -30,7 +36,12 @@ router.post('/', (req, res) => {
             req.session.valid = true;
             req.session.user = documents[0];
             res.json({
-                ok: 1
+                ok: 1,
+                info: {
+                    name: documents[0].first_name,
+                    username: documents[0].username,
+                    groups: documents[0].groups.split(',')
+                }
             });
         } else res.json({
                 ok: 0,

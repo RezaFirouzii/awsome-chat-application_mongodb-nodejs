@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const cloud = require('cloudinary').v2;
-const fs = require('fs');
-const formidable = require('formidable');
 const db = require('../../config/db');
 const usersCollection = '_users';
 const groupsCollection = '_groups';
@@ -54,12 +51,14 @@ router.get('/render', (req, res) => {
                         if (err) console.log(err);
                         else if (documents.length) {
                             const group = documents[0];
+                            joinedGroup.id = group._id;
                             joinedGroup.name = group.name;
                             joinedGroup.logo = group.name + groupID;
                             joinedGroup.admin = group.admin;
                             joinedGroup.members = group.members.split(',');
                             joinedGroup.members.pop();
                             joinedGroup.size = joinedGroup.members.length;
+                            joinedGroup.onlineUsers = [];
 
                             db.getDB().collection(groupID).find({}).toArray((err, documents) => {
                                 if (err) console.log(err);
@@ -84,7 +83,7 @@ router.get('/render', (req, res) => {
         }).then(userGroups => {
             res.json({
                 user: {
-                    name: req.session.user.name,
+                    first_name: req.session.user.first_name,
                     last_name: req.session.user.last_name,
                     username: req.session.user.username,
                     groups: userGroups

@@ -58,11 +58,12 @@
             }
         }).then(response => {
             return response.json();
-        }).then(jsonResponse => {
-            if (jsonResponse.ok)
-                window.location.href = ''; // chat route
+        }).then(data => {
+            if (data.ok)
+                // window.location.href = `/chat?name=${data.name}&username=${data.username}&groups=${data.groups}`;
+                window.location.href = `/chat`;
             else
-                alert(jsonResponse.description);
+                alert(data.description);
         });
     });
 </script>
