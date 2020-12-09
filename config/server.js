@@ -111,8 +111,11 @@ io.on('connection', socket => {
 
     socket.on('output', (admin, message, groupID) => {
         io.to(groupID).emit('input', admin, message);
-        // db work
-    })
+        // saving messages into db
+        db.getDB().collection(groupID).insertOne(message, (err, data) => {
+            if (err) console.log(err);
+        });
+    });
 
     socket.on('disconnect', () => {
         console.log("Somebody left");

@@ -25,7 +25,8 @@ router.get('/render', (req, res) => {
     const userGroups = [];
     const joinedGroup = {};
 
-    // data to be sent => [ { php, logo, admin, members[], messages[] } , { js, logo, admin, members[], messages[] } , ... ]
+    // user groups to be sent:
+    // [ { name (str), image (str), admin (str), members[] (array of usernames), messages[] (array of messages) } , ... ]
 
     new Promise((resolve) => {
         db.getDB().collection(usersCollection).find({ _id: db.getPrimaryKey(req.session.user._id)}).toArray((err, documents) => {
@@ -43,10 +44,8 @@ router.get('/render', (req, res) => {
             groups.pop();
             for (let i = 0; i < groups.length; i++) {
                 new Promise((resolve) => {
-
                     const groupID = groups[i];
-                    if (groupID === '') return;
-
+                    // creating each group with its info
                     db.getDB().collection(groupsCollection).find({_id: db.getPrimaryKey(groupID)}).toArray((err, documents) => {
                         if (err) console.log(err);
                         else if (documents.length) {
@@ -59,20 +58,19 @@ router.get('/render', (req, res) => {
                             joinedGroup.members.pop();
                             joinedGroup.size = joinedGroup.members.length;
                             joinedGroup.onlineUsers = [];
-
-                            db.getDB().collection(groupID).find({}).toArray((err, documents) => {
-                                if (err) console.log(err);
-                                else if (documents.length) {
-                                    joinedGroup.messages = documents;
-                                }
-                            });
                         }
                         return resolve(joinedGroup);
                     });
                 }).then(response => {
                     return JSON.parse(JSON.stringify(response));
                 }).then(joinedGroup => {
-                    userGroups.push(joinedGroup);
+                    // Getting all messages from group.id collection
+                    db.getDB().collection(joinedGroup.id).find({}).toArray((err, documents) => {
+                        if (err) console.log(err);
+                        else if (documents.length)
+                            joinedGroup.messages = documents;
+                        userGroups.push(joinedGroup);
+                    });
                     setTimeout(() => resolve(userGroups), 50);
                 }).catch(e => {
                     console.log(e);

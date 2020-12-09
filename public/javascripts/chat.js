@@ -14,9 +14,17 @@ fetch('/chat/render').then(response => {
 }).then(data => {
     // Adding chat boxes for each group
     data.user.groups.forEach(group => {
+        let lastMessage;
+        if (group.messages === undefined) {
+            group.messages = [];
+            lastMessage = undefined;
+        } else {
+            lastMessage = group.messages[group.messages.length - 1];
+        }
+
         const groupsList = document.querySelector('.groups');
         const chatBox = document.createElement('li');
-        chatBox.innerHTML = getChatBoxTemplate(group.name/*, group.logo, groupMessages[totalMessages - 1]*/);
+        chatBox.innerHTML = getChatBoxTemplate(group.name, '/images/utils/bg.jpg', lastMessage);
         groupsList.appendChild(chatBox);
 
         const info = {
@@ -70,11 +78,11 @@ fetch('/chat/render').then(response => {
                 socket.emit('output', group.admin, message, group.id);
                 typeMsg.value = '';
             });
-            chatPanel.scrollTop = chatPanel.scrollHeight;
         });
         socket.on('input', (admin, message) => {
             const messageTemplate = getMessageTemplate(data.user, admin, message);
             group.chatCard.body.appendChild(messageTemplate);
+            group.chatCard.body.scrollTop = group.chatCard.body.scrollHeight;
         });
     });
 });
