@@ -130,4 +130,80 @@ router.post('/add-group', (req, res) => {
     });
 });
 
+router.put('/add-member', (req, res) => {
+    // extracting username of the new member & group id
+    let username = req.body.newMember;
+    let groupID = req.body.groupID;
+
+    // server side validation
+    const invalidChars = "\"!#$%^&*()+{}|-=[]\\\\/\\',<>?\\\"";
+    for (const char of invalidChars)
+        if (username.includes(char)) {
+            res.json({
+                ok: 0,
+                reason: `Username contains the invalid character: '${char}'`
+            });
+            return;
+        }
+
+    if (username.indexOf('@') > 0) {
+        res.json({
+            ok: 0,
+            reason: 'Username contains invalid char in an invalid position'
+        });
+        return;
+    }
+
+    username = username[0] === '@' ? username : "@" + username;
+    username = username.toLowerCase();
+
+    new Promise((resolve, reject) => {
+        db.getDB().collection(usersCollection).find({username}).toArray((err, documents) => {
+            if (err) console.log(err);
+            else if (documents.length) {
+                const user = documents[0];
+                if (user.groups.includes(groupID)) {
+                    const response = {
+                        ok: 0,
+                        reason: `The user:  ${username} already exists in the group!`
+                    };
+                    return reject(response);
+                }
+                // updating the user
+                user.groups += groupID + ',';
+                db.getDB().collection(usersCollection).findOneAndUpdate({username}, {$set: {groups: user.groups}}, {returnOriginal: false}, (err, result) => {
+                    if (err) console.log(err);
+                });
+                return resolve(user);
+            } else {
+                const response = {
+                    ok: 0,
+                    reason: 'User not found! invalid username.'
+                };
+                return reject(response);
+            }
+        });
+    }).then(response => {
+      return JSON.parse(JSON.stringify(response));
+    }).then(user => {
+        // updating the group which user is added to
+        db.getDB().collection(groupsCollection).find({_id: db.getPrimaryKey(groupID)}).toArray((err, documents) => {
+            if (err) console.log(err);
+            else if (documents.length) {
+                const group = documents[0];
+                group.members += user.username + ",";
+                db.getDB().collection(groupsCollection).findOneAndUpdate({_id: db.getPrimaryKey(groupID)}, {$set: {members: group.members}}, {returnOriginal: false}, (err, result) => {
+                    if (err) console.log(err);
+                    else res.json({
+                        ok: 1,
+                        first_name: user.first_name
+                    });
+                });
+            }
+        });
+    }).catch(err => {
+        res.json(err);
+    });
+});
+
 module.exports = router;

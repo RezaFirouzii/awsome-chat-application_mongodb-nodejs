@@ -78,6 +78,7 @@ fetch('/chat/render').then(response => {
                 socket.emit('output', group.admin, message, group.id);
                 typeMsg.value = '';
             });
+            setTimeout(() => groupMenuOnListen(data.user.first_name, group), 1);
         });
         socket.on('input', (admin, message) => {
             const messageTemplate = getMessageTemplate(data.user, admin, message);
@@ -93,3 +94,58 @@ newGroupBtn.addEventListener('click', e => {
     e.preventDefault();
     window.location.href = '/chat/add-group';
 });
+
+/* group menu listener */
+function groupMenuOnListen(name, group) {
+    const menuBtn = document.getElementById('action_menu_btn');
+    const actionMenu = document.querySelector('.action_menu');
+    const options = actionMenu.firstChild.nextSibling.childNodes;
+
+    actionMenu.style.display = 'none';
+    menuBtn.addEventListener('click', e => {
+        e.preventDefault();
+        actionMenu.style.display = actionMenu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Add member listener
+    options[5].addEventListener('click', e => {
+        const newMember = prompt('Enter username of the new member');
+
+        // client side validation
+        if (newMember === '') {
+            alert('Please enter a username.');
+            return;
+        }
+        if (newMember.length < 5) {
+            alert('Username must be at least 5 characters.');
+            return;
+        }
+
+        fetch('/chat/add-member', {
+            method: 'put',
+            body: JSON.stringify({newMember, groupID: group.id}),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            return response.json();
+        }).then(jsonRes => {
+            if (!jsonRes.ok) {
+                alert(jsonRes.reason);
+                return;
+            }
+            const message = {
+                owner: {name: '', username: ''},
+                message: `${name}</i> added <i>${jsonRes.first_name}</i> to group.`,
+                date: "Monday",
+                time: "22:00 PM"
+            }
+            socket.emit('output', group.admin, message, group.id);
+            // window.location.href = String(window.location.href);
+        });
+    });
+}
+
+
+
+

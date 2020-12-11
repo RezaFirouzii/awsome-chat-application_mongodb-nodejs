@@ -1,4 +1,4 @@
-const lastUser = {};
+const lastUser = { username: '' };
 
 export function getChatBoxTemplate(name, imageAddress, lastMessage) {
     if (name === undefined) name = '';
@@ -32,7 +32,7 @@ export function getGroupHeaderTemplate(name, population, onlineMembers=[1]) {
                                 <ul>
                                     <li><i class="fas fa-users"></i> Members</li>
                                     <li><i class="fas fa-user-circle"></i> Online Members</li>
-                                    <li><i class="fas fa-plus"></i> Add to group</li>
+                                    <li><i class="fas fa-plus"></i> Add member</li>
                                     <li><i class="fas fa-ban"></i> Leave Group</li>
                                 </ul>
                             </div>`
@@ -75,25 +75,29 @@ export function getMessageTemplate(user, admin, message) {
         const bubble = document.createElement('div');
         bubble.classList.add('msg_container_send');
 
+        if (message.owner.username === lastUser.username) message.owner.name = '';
         let bubbleHtml = `<span class="msg_user_send">${message.owner.name}</span>
                             ${message.message}
                           <span class="msg_time_send">${message.time}, ${message.date}</span>`;
-        if (user.username === admin)
+        if (user.username === admin && user.username !== lastUser.username)
             bubbleHtml += `<span><i class="material-icons user_admin">how_to_reg</i></span>`;
         bubble.innerHTML = bubbleHtml;
         messageTemplate.appendChild(bubble);
+        lastUser.username = message.owner.username;
     } else {
         messageTemplate.classList.add('justify-content-start');
         const bubble = document.createElement('div');
         bubble.classList.add('msg_container');
 
+        if (message.owner.username === lastUser.username) message.owner.name = '';
         let bubbleHtml = `<span class="msg_user">${message.owner.name}</span>
-                              ${message.message}
-                              <span class="msg_time">${message.time}, ${message.date}</span>`;
-        if (message.owner.username === admin)
+                            ${message.message}
+                          <span class="msg_time">${message.time}, ${message.date}</span>`;
+        if (message.owner.username === admin && message.owner.username !== lastUser.username)
             bubbleHtml += `<span><i class="material-icons msg_admin">how_to_reg</i></span>`;
         bubble.innerHTML = bubbleHtml;
         messageTemplate.appendChild(bubble);
+        lastUser.username = message.owner.username;
     }
     return messageTemplate;
 }

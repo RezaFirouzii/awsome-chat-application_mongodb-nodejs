@@ -54,6 +54,7 @@ router.post('/', (req, res) => {
 
 function validate(req) {
 
+    const invalidChars = "\"!#$%^&*()+{}|-=[]\\\\/\\',<>?\\\"";
     req.body.email = req.body.email.toLowerCase();
     req.body.username = req.body.username.toLowerCase();
 
@@ -67,17 +68,35 @@ function validate(req) {
         }
     }
 
+    for (const char of invalidChars)
+        if (req.body.username.contains(char))
+            return {
+                ok: 0,
+                n: 0,
+                valid: false,
+                reason: `Username contains the invalid character: '${char}'`
+            };
+
+    if (req.body.username[0] === '_')
+        return {
+            ok: 0,
+            n: 0,
+            valid: false,
+            reason: "Username must not start with '_'"
+        };
+
     if (req.body.username.length < 5) {
         return {
             ok: 0,
             n: 0,
             valid: false,
             reason: "Username must be at least 5 characters!"
-        }
+        };
     }
+
     return {
         valid: true
-    }
+    };
 }
 
 function hasDuplicateEmail(req) {
