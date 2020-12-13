@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../../config/db');
 const usersCollection = '_users';
 const groupsCollection = '_groups';
+const users = require('../../config/users');
 
 /* GET Chat Home page */
 router.get('/', (req, res) => {
@@ -203,6 +204,56 @@ router.put('/add-member', (req, res) => {
         });
     }).catch(err => {
         res.json(err);
+    });
+});
+
+router.put('/leave-group', (req, res) => {
+    const {username, groupID} = req.body;
+    new Promise(resolve => {
+        // removing this group from user groups
+        db.getDB().collection(usersCollection).find({username}).toArray((err, documents) => {
+            if (err) console.log(err);
+            const user = documents[0];
+            const groups = user.groups.split(',');
+            groups.splice(groups.indexOf(groupID), 1);
+            user.groups = groups.join(',');
+            db.getDB().collection(usersCollection).findOneAndUpdate({username}, {$set: {groups: user.groups}}, {returnOriginal: false}, (err, result) => {
+                if (err) console.log(err);
+            });
+            resolve({ok: 1});
+        });
+    }).then(response => {
+        return JSON.parse(JSON.stringify(response));
+    }).then(response => {
+        if (response.ok) {
+            // removing this user from this group collection
+            db.getDB().collection(groupsCollection).find({_id: db.getPrimaryKey(groupID)}).toArray((err, documents) => {
+                if (err) console.log(err);
+                const group = documents[0];
+                const members = group.members.split(',');
+                members.splice(members.indexOf(username), 1);
+                group.members = members.join(',');
+                // if group is empty we remove its collection from db
+                if (members.length === 1) {
+                    db.getDB().dropCollection(String(groupID), (err, result) => {
+                        if (err) console.log(err);
+                    });
+                    db.getDB().collection(groupsCollection).findOneAndDelete({_id: db.getPrimaryKey(groupID)}, (err) => {
+                        if (err) console.log(err);
+                    });
+                    res.json({ok: 1, deleted: true});
+                    return;
+                }
+                db.getDB().collection(groupsCollection).findOneAndUpdate({_id: db.getPrimaryKey(groupID)}, {$set: {members: group.members}}, {returnOriginal: false}, (err, result) => {
+                    if (err) console.log(err);
+                    // Handling online users
+                    const onlineUsers = users.getOnlineUsers(groupID);
+                    const offlineUser = onlineUsers.find(user => user.username === username);
+                    onlineUsers.splice(onlineUsers.indexOf(offlineUser), 1);
+                    res.json({ok: 1, deleted: false});
+                });
+            });
+        }
     });
 });
 

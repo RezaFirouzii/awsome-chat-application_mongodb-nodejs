@@ -78,7 +78,7 @@ fetch('/chat/render').then(response => {
                 socket.emit('output', group.admin, message, group.id);
                 typeMsg.value = '';
             });
-            setTimeout(() => groupMenuOnListen(data.user.first_name, group), 1);
+            setTimeout(() => groupMenuOnListen(data.user, group), 10);
         });
         socket.on('input', (admin, message) => {
             const messageTemplate = getMessageTemplate(data.user, admin, message);
@@ -96,7 +96,7 @@ newGroupBtn.addEventListener('click', e => {
 });
 
 /* group menu listener */
-function groupMenuOnListen(name, group) {
+function groupMenuOnListen(user, group) {
     const menuBtn = document.getElementById('action_menu_btn');
     const actionMenu = document.querySelector('.action_menu');
     const options = actionMenu.firstChild.nextSibling.childNodes;
@@ -136,12 +136,38 @@ function groupMenuOnListen(name, group) {
             }
             const message = {
                 owner: {name: '', username: ''},
-                message: `${name}</i> added <i>${jsonRes.first_name}</i> to group.`,
+                message: `<i>${user.first_name}</i> added <i>${jsonRes.first_name}</i> to group.`,
                 date: "Monday",
                 time: "22:00 PM"
             }
             socket.emit('output', group.admin, message, group.id);
-            // window.location.href = String(window.location.href);
+        });
+    });
+    // Leave group listener
+    options[7].addEventListener('click', e => {
+        e.preventDefault();
+        fetch('/chat/leave-group', {
+            method: 'put',
+            body: JSON.stringify({
+                username: user.username,
+                groupID: group.id
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            return response.json();
+        }).then(status => {
+            if (status.ok && !status.deleted) {
+                const message = {
+                    owner: {name: '', username: ''},
+                    message: `<i>${user.first_name}</i> left the group.`,
+                    date: "Monday",
+                    time: "22:00 PM"
+                }
+                socket.emit('output', group.admin, message, group.id);
+            }
+            window.location.reload();
         });
     });
 }
