@@ -102,6 +102,13 @@ export function getMessageTemplate(user, admin, message) {
     return messageTemplate;
 }
 
+export function getMemberTemplate(longestNameLength, currentName, longestUsernameLength, currentUsername) {
+    let memberTemplate = `👤 ${currentName}`;
+    for (let i = 0; i < longestNameLength - currentName.length; i++) memberTemplate += ' ';
+    memberTemplate += ` 🆔 ${currentUsername}`;
+    for (let i = 0; i < 2 * (longestUsernameLength - currentUsername.length); i++) memberTemplate += ' ';
+    return memberTemplate;
+}
 
 
 

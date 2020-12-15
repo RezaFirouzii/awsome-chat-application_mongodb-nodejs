@@ -131,6 +131,39 @@ router.post('/add-group', (req, res) => {
     });
 });
 
+// GET request for getting all members of the group
+router.get('/group-members', (req, res) => {
+    const membersUsernames = req.query.members.split(',');
+    const members = [];
+    let longestName = 0, longestUsername = 0;
+    new Promise(resolve => {
+        membersUsernames.forEach(username => {
+            db.getDB().collection(usersCollection).find({username}).toArray((err, documents) => {
+                if (err) console.log(err);
+
+                const user = documents[0];
+                const nameLength = (user.first_name + user.last_name).length;
+                if (nameLength > longestName) longestName = nameLength;
+                if (username.length > longestUsername) longestUsername = username.length;
+
+                members.push({
+                    name: `${user.first_name} ${user.last_name}`, username
+                });
+                if (members.length === membersUsernames.length) return resolve({
+                    members, longestName, longestUsername
+                });
+            });
+        });
+    }).then(response => JSON.parse(JSON.stringify(response))).then(data => res.json(data));
+});
+
+// GET request for getting online members of the group
+router.get('/online-members', (req, res) => {
+    const groupID = req.query.groupID;
+    res.json(users.getOnlineUsers(groupID));
+});
+
+// PUT request for Adding a member to group
 router.put('/add-member', (req, res) => {
     // extracting username of the new member & group id
     let username = req.body.newMember;
@@ -207,6 +240,7 @@ router.put('/add-member', (req, res) => {
     });
 });
 
+// PUT request for leaving the group
 router.put('/leave-group', (req, res) => {
     const {username, groupID} = req.body;
     new Promise(resolve => {

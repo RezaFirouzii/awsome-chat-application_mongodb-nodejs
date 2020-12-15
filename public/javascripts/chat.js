@@ -3,7 +3,8 @@ import {
     getGroupHeaderTemplate,
     getGroupBodyTemplate,
     getGroupFooterTemplate,
-    getMessageTemplate
+    getMessageTemplate,
+    getMemberTemplate
 } from "./script.js";
 
 const socket = io();
@@ -107,12 +108,40 @@ function groupMenuOnListen(user, group) {
         actionMenu.style.display = actionMenu.style.display === 'none' ? 'block' : 'none';
     });
 
+    // Members of group listener
+    options[1].addEventListener('click', e => {
+        e.preventDefault();
+        fetch(`/chat/group-members?members=${group.members}`).then(response => response.json()).then(data => {
+            let membersInfo = '';
+            const longestName = data.longestName + 1; // length 0f the longest name (Number)
+            const longestUsername = data.longestUsername; // length of the longest username (Number)
+            data.members.forEach(member => {
+                membersInfo += getMemberTemplate(longestName, member.name, longestUsername, member.username);
+                if (member.username === group.admin) membersInfo += '     ⭐';
+                membersInfo += '\n';
+            });
+            alert(membersInfo);
+        });
+    });
+
+    // Online members listener
+    options[3].addEventListener('click', e => {
+        e.preventDefault();
+        fetch(`/chat/online-members?groupID=${group.id}`).then(response => response.json()).then(onlineMembers => {
+            let info = '';
+            onlineMembers.forEach(member => {
+                info += `🗣 ${member.first_name} ${member.last_name}\n`
+            });
+            alert(info);
+        });
+    });
+
     // Add member listener
     options[5].addEventListener('click', e => {
         const newMember = prompt('Enter username of the new member');
 
         // client side validation
-        if (newMember === '') {
+        if (newMember === '' || newMember === null) {
             alert('Please enter a username.');
             return;
         }
@@ -170,6 +199,10 @@ function groupMenuOnListen(user, group) {
             window.location.reload();
         });
     });
+}
+
+function setSpace(longest, current) {
+
 }
 
 
