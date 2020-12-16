@@ -26,7 +26,7 @@
                 <br>
                 <div class="form-group">
                     <label>Group photo</label>
-                    <input type="file" name="image_address" accept="image/*" onchange="preview(this)"
+                    <input type="file" name="file" accept="image/*" onchange="preview(this)"
                            class="form-control-file">
                 </div>
                 <div id="image_preview"></div>
@@ -45,29 +45,28 @@
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
         crossorigin="anonymous"></script>
 <script>
-    let group_image;
+    let image;
     const groupNameField = document.querySelector('.form-control');
     const imagePreview = document.getElementById('image_preview');
     const createBtn = document.querySelector('.btn');
 
     function preview(input) {
         if (input.files && input.files[0]) {
-            group_image = input.files[0];
             const reader = new FileReader();
             reader.onload = (e => {
                 imagePreview.innerHTML = `<img src="${e.target.result}" alt="photo not loaded" class="group_img">`
                 console.log(e.target);
             });
             reader.readAsDataURL(input.files[0]);
+            image = input.files[0];
         }
     }
-
     createBtn.addEventListener('click', e => {
         e.preventDefault();
         fetch('/chat/add-group', {
             method: 'post',
             body: JSON.stringify({
-                name: groupNameField.value,
+                name: groupNameField.value
             }),
             headers: {
                 'Content-Type': 'application/json'

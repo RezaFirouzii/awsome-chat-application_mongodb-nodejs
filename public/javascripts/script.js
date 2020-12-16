@@ -1,9 +1,13 @@
 const lastUser = { username: '' };
 
-export function getChatBoxTemplate(name, imageAddress, lastMessage) {
+export function getChatBoxTemplate(name, imageAddress, lastMessage, ownerName) {
     if (name === undefined) name = '';
-    const description = lastMessage === undefined
-        ? '' : `<p><b>${lastMessage.owner.name}:</b> ${lastMessage.message}</p>`;
+    let description;
+    if (lastMessage === undefined) description = '';
+    else if (lastMessage.owner.name === '' && ownerName !== undefined)
+        description = `<p><b>${ownerName}:</b> ${lastMessage.message}</p>`;
+    else description = `<p><b>${lastMessage.owner.name}:</b> ${lastMessage.message}</p>`;
+
     return `<div class="d-flex bd-highlight">
                 <div class="img_cont">
                     <img src="${imageAddress}" alt="${name}" class="rounded-circle group_img">

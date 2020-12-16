@@ -94,6 +94,57 @@ router.get('/render', (req, res) => {
     });
 });
 
+/* GET searched groups */
+router.get('/search', (req, res) => {
+    const searchValue = req.query.search;
+    if (searchValue === '') {
+        res.json({ok: 0, n: 0});
+        return;
+    }
+    const regex = {$regex: `^${searchValue}`, $options: 'i'};
+    new Promise(resolve => {
+        db.getDB().collection(groupsCollection).find({name: regex}).toArray((err, documents) => {
+            if (err) console.log(err);
+            else if (documents.length) {
+                return resolve({
+                    ok: 1,
+                    n: documents.length,
+                    groups: documents
+                });
+            } else return resolve({ok: 1, n: 0});
+        });
+    }).then(response => JSON.parse(JSON.stringify(response))).then(data => {
+        if (data.n) {
+            const foundGroups = [];
+            new Promise(resolve => {
+                data.groups.forEach(group => {
+                    group.id = group._id;
+                    group.members = group.members.split(',');
+                    group.members.pop();
+                    group.size = group.members.length;
+                    group.onlineMembers = [];
+                    db.getDB().collection(group._id).find({}).toArray((err, messages) => {
+                        group.messages = messages;
+                        foundGroups.push(group);
+                        if (foundGroups.length === Number(data.groups.length))
+                            return resolve(foundGroups);
+                    });
+                });
+            }).then(response => JSON.parse(JSON.stringify(response))).then(foundGroups => {
+                console.log(foundGroups);
+                res.json({
+                    user: {
+                        first_name: req.session.user.first_name,
+                        last_name: req.session.user.last_name,
+                        username: req.session.user.username,
+                        groups: foundGroups
+                    }, ok: 1, n: foundGroups.length
+                });
+            });
+        } else res.json({ok: 1, n: 0, status: 'No Group Found'});
+    });
+});
+
 /* GET add group page */
 router.get('/add-group', (req, res) => {
     res.render('chat/new-group');
@@ -102,7 +153,6 @@ router.get('/add-group', (req, res) => {
 /* POST request for creating a new group */
 router.post('/add-group', (req, res) => {
 
-    console.log(req.body);
     const newGroup = {
         name: req.body.name,
         admin: req.session.user.username,
@@ -125,7 +175,7 @@ router.post('/add-group', (req, res) => {
                 {$set: { groups: req.session.user.groups + groupID + ","}},
                 {returnOriginal: false}, (err, result) => {
                     if (err) console.log(err);
-                    else res.json({ok: 1});
+                    else res.json({ok:1});
                 });
         }
     });
