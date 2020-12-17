@@ -27,6 +27,7 @@ router.get('/', function (req, res, next) {
 /* POST login request */
 router.post('/', (req, res) => {
 
+    req.body.username = req.body.username.toLowerCase();
     req.body.username = req.body.username[0] === '@'
         ? req.body.username : "@" + req.body.username;
 

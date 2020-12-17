@@ -10,7 +10,6 @@ router.get('/', function (req, res) {
         res.end();
         return;
     }
-    console.log(req.session.auth);
     res.render('entry/verification');
 });
 

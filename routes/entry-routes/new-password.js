@@ -13,7 +13,6 @@ router.get('/', (req, res) => {
         return;
     }
     res.render('entry/new-password');
-    console.log(req.session.user);
 });
 
 /* PUT request for new password */

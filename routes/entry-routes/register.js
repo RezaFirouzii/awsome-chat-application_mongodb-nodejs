@@ -54,9 +54,17 @@ router.post('/', (req, res) => {
 
 function validate(req) {
 
-    const invalidChars = "\"!#$%^&*()+{}|-=[]\\\\/\\',<>?\\\"";
+    const invalidChars = "\"!#~$%^&*()+{}|-=[]\\\\/\\',<>?\\\"";
     req.body.email = req.body.email.toLowerCase();
     req.body.username = req.body.username.toLowerCase();
+
+    if (req.body.first_name === '' || req.body.username === '' || req.body.password === '')
+        return {
+            ok: 0,
+            n: 0,
+            valid: false,
+            reason: 'Please fill out all the fields!'
+        };
 
     if (!(req.body.email.includes('@') && req.body.email.includes('.')
         && req.body.email.indexOf('@') < req.body.email.lastIndexOf('.'))) {
@@ -69,7 +77,7 @@ function validate(req) {
     }
 
     for (const char of invalidChars)
-        if (req.body.username.contains(char))
+        if (req.body.username.includes(char))
             return {
                 ok: 0,
                 n: 0,
@@ -85,6 +93,23 @@ function validate(req) {
             reason: "Username must not start with '_'"
         };
 
+    if (req.body.username.indexOf('@') > 0)
+       return {
+           ok: 0,
+           n: 0,
+           valid: false,
+           reason: 'Username contains invalid char in an invalid position'
+       };
+
+    const numbers = '0123456789';
+    if (numbers.includes(req.body.username[0]))
+        return {
+            ok: 0,
+            n: 0,
+            valid: false,
+            reason: "Username must not start with a number!"
+        };
+
     if (req.body.username.length < 5) {
         return {
             ok: 0,
@@ -93,7 +118,6 @@ function validate(req) {
             reason: "Username must be at least 5 characters!"
         };
     }
-
     return {
         valid: true
     };

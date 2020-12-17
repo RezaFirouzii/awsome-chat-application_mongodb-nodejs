@@ -18,13 +18,13 @@ export function getChatBoxTemplate(name, imageAddress, lastMessage, ownerName) {
             </div>`;
 }
 
-export function getGroupHeaderTemplate(name, population, onlineMembers=[1]) {
+export function getGroupHeaderTemplate(name, image, population, onlineMembers=[1]) {
     if (population === undefined) population = 0;
     const headerNode = document.createElement('div');
     headerNode.classList.add('card-header', 'msg-head');
     headerNode.innerHTML = `<div class="d-flex bd-highlight">
                                 <div class="img_cont">
-                                    <img src="" alt="" class="rounded-circle group_img">
+                                    <img src="${image}" alt="" class="rounded-circle group_img">
                                 </div>
                                 <div class="group_info">
                                     <span>${name}</span>

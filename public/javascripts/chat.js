@@ -29,7 +29,7 @@ function renderChat(data) {
 
         const groupsList = document.querySelector('.groups');
         const chatBox = document.createElement('li');
-        chatBox.innerHTML = getChatBoxTemplate(group.name, '/images/utils/bg.jpg', lastMessage);
+        chatBox.innerHTML = getChatBoxTemplate(group.name, group.image, lastMessage);
         groupsList.appendChild(chatBox);
 
         const info = {
@@ -47,7 +47,7 @@ function renderChat(data) {
             e.preventDefault();
             if (!group.visited) {
                 group.visited = true;
-                const header = getGroupHeaderTemplate(group.name, group.size);
+                const header = getGroupHeaderTemplate(group.name, group.image, group.size);
                 const body = getGroupBodyTemplate(data.user, group.admin, group.messages);
                 const footer = getGroupFooterTemplate();
                 group.chatCard = { header, body, footer };
@@ -56,17 +56,14 @@ function renderChat(data) {
 
             socket.emit('groupSelection', info, group);
             socket.on('online', onlineUsers => {
-                console.log(onlineUsers);
-                group.chatCard.header = getGroupHeaderTemplate(group.name, group.size, onlineUsers);
+                group.chatCard.header = getGroupHeaderTemplate(group.name, group.image, group.size, onlineUsers);
                 chatCard.innerHTML = '';
                 chatCard.append(group.chatCard.header, group.chatCard.body, group.chatCard.footer);
             });
-
-            chatCard.scrollTop = chatCard.scrollHeight;
+            scrollBottom(group.chatCard.body);
             chatPanel.innerHTML = '';
             chatPanel.appendChild(chatCard);
 
-            console.log(data);
             // send button listener
             const sendBtn = document.querySelector('.send_btn');
             const typeMsg = document.querySelector('.type_msg');
@@ -78,21 +75,22 @@ function renderChat(data) {
                         name: data.user.first_name,
                         username: data.user.username
                     },
-                    message: typeMsg.value,
-                    date: "Monday",
-                    time: "22:00 PM"
+                    message: typeMsg.value
                 }
                 socket.emit('output', group.admin, message, group.id);
                 typeMsg.value = '';
             });
-            setTimeout(() => groupMenuOnListen(data.user, group), 10);
+            setTimeout(() => groupMenuOnListen(data.user, group), 50);
         });
-        if (group.chatCard === undefined) group.chatCard = chatCard;
+        if (group.chatCard === undefined) {
+            group.chatCard = chatCard;
+            group.chatCard.body = getGroupBodyTemplate(data.user, group.admin, group.messages);
+        }
         socket.on('input', (admin, message) => {
-            chatBox.innerHTML = getChatBoxTemplate(group.name, '/images/utils/bg.jpg', message, data.user.first_name);
+            chatBox.innerHTML = getChatBoxTemplate(group.name, group.image, message, data.user.first_name);
             const messageTemplate = getMessageTemplate(data.user, admin, message);
             group.chatCard.body.appendChild(messageTemplate);
-            group.chatCard.body.scrollTop = group.chatCard.body.scrollHeight;
+            scrollBottom(group.chatCard.body);
         });
     });
 }
@@ -221,7 +219,10 @@ function groupMenuOnListen(user, group) {
     });
 }
 
-
-
-
-
+function scrollBottom(body) {
+    // setting the scroll to bottom
+    const interval = setInterval(() => {
+        body.scrollTop = body.scrollHeight;
+    }, 10);
+    setTimeout(() => clearInterval(interval), 2000);
+}

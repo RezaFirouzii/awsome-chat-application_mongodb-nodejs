@@ -1,5 +1,3 @@
-#!/usr/config/env node
-
 // Module dependencies.
 const createError = require('http-errors');
 const express = require('express');
@@ -10,16 +8,16 @@ const redis = require('redis');
 const redisStore = require('connect-redis')(session);
 const client = redis.createClient();
 const logger = require('morgan');
-const debug = require('debug')('awsome-chat-application:server');
+const debug = require('debug')('awesome-chat-application:server');
 const http = require('http');
 const socket = require('socket.io');
+const moment = require('moment');
 const db = require('./db');
 const { userJoin, getOnlineUsers } = require('./users');
 
 const app = express();
 
 const indexRouter = require('../routes/index');
-
 const loginRouter = require('../routes/entry-routes/login');
 const registerRouter = require('../routes/entry-routes/register');
 const forgotPasswordRouter = require('../routes/entry-routes/forgot-password');
@@ -34,13 +32,13 @@ app.set('view engine', 'ejs');
 app.set('trust proxy', 1);
 
 app.use(logger('dev'));
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser());
 app.use(session({
     secret: "secret keyword",
-    store: new redisStore({ host: 'localhost', port: 6379, client: client, ttl: 260 }),
+    store: new redisStore({ host: 'localhost', port: 6379, client: client, ttl: 1000 }),
     resave: false,
     saveUninitialized: false
 }));
@@ -80,7 +78,6 @@ const server = http.createServer(app);
 /**
  * if and only if database connection is successful.
  */
-
 db.connect(err => {
     if (err) {
         console.log('Unable to connect to mongodb server\n', err);
@@ -101,8 +98,6 @@ const io = socket(server);
 io.on('connection', socket => {
     // if a user logs in, online members of
     // his/her groups will increase by 1
-    console.log('hi');
-
     socket.on('groupSelection', (info, group) => {
         const user = userJoin(socket.id, info, group);
         socket.join(user.groupID);
@@ -110,15 +105,13 @@ io.on('connection', socket => {
     });
 
     socket.on('output', (admin, message, groupID) => {
+        message.date = moment().format('MM/DD/YYYY');
+        message.time = moment().format('hh:mm A');
         io.to(groupID).emit('input', admin, message);
         // saving messages into db
         db.getDB().collection(groupID).insertOne(message, (err, data) => {
             if (err) console.log(err);
         });
-    });
-
-    socket.on('disconnect', () => {
-        console.log("Somebody left");
     });
 });
 

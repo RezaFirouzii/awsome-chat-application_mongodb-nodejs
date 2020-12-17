@@ -5,6 +5,8 @@ const usersCollection = '_users';
 const groupsCollection = '_groups';
 const users = require('../../config/users');
 
+const invalidChars = "\"!#~$%^&*()+{}|-=[]\\\\/\\',<>?\\\"";
+
 /* GET Chat Home page */
 router.get('/', (req, res) => {
     if (req.session.hasOwnProperty('valid')) {
@@ -53,7 +55,7 @@ router.get('/render', (req, res) => {
                             const group = documents[0];
                             joinedGroup.id = group._id;
                             joinedGroup.name = group.name;
-                            joinedGroup.logo = group.name + groupID;
+                            joinedGroup.image = group.image;
                             joinedGroup.admin = group.admin;
                             joinedGroup.members = group.members.split(',');
                             joinedGroup.members.pop();
@@ -131,7 +133,6 @@ router.get('/search', (req, res) => {
                     });
                 });
             }).then(response => JSON.parse(JSON.stringify(response))).then(foundGroups => {
-                console.log(foundGroups);
                 res.json({
                     user: {
                         first_name: req.session.user.first_name,
@@ -153,8 +154,19 @@ router.get('/add-group', (req, res) => {
 /* POST request for creating a new group */
 router.post('/add-group', (req, res) => {
 
+    if (req.body.name === '') {
+        res.json({ok: 0, reason: 'Please enter a name'});
+        return;
+    }
+    for (const char of invalidChars)
+        if (req.body.name.includes(char)) {
+            res.json({ok: 0, reason: `Group name must not contain invalid character: '${char}'`});
+            return;
+        }
+
     const newGroup = {
         name: req.body.name,
+        image: req.body.image,
         admin: req.session.user.username,
         members: req.session.user.username + ','
     }
@@ -220,7 +232,6 @@ router.put('/add-member', (req, res) => {
     let groupID = req.body.groupID;
 
     // server side validation
-    const invalidChars = "\"!#$%^&*()+{}|-=[]\\\\/\\',<>?\\\"";
     for (const char of invalidChars)
         if (username.includes(char)) {
             res.json({

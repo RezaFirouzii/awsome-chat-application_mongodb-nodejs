@@ -25,16 +25,9 @@ function userJoin(id, info, group) {
     return user;
 }
 
-// Getting current user
-function getCurrentUser(id, group) {
-    const object = onlineUsers.find(obj => obj.id === group.id);
-    return object.users.find(user => user.id === id);
-}
-
 // Getting online members
 function getOnlineUsers(id) {
     const object = onlineUsers.find(obj => obj.id === id);
-    console.log(onlineUsers);
     return object.users;
 }
 

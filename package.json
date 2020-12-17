@@ -7,14 +7,12 @@
     "server": "nodemon config/server.js"
   },
   "dependencies": {
-    "cloudinary": "^1.23.0",
     "connect-redis": "^5.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
     "express-session": "^1.17.1",
-    "formidable": "^1.2.2",
     "http-errors": "~1.6.3",
     "moment": "^2.29.1",
     "mongodb": "^3.6.3",
