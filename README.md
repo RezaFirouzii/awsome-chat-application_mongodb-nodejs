@@ -62,4 +62,4 @@ Messages of a Chatroom =       date (str),
 <h5> &#128308; Replace your own email account information in <a href="https://github.com/RezaFirouzii/chat-application_mongodb-nodejs/blob/master/routes/entry-routes/forgot-password.js#L7"> routes/entry-routes/forgot-password.js</a> with myInfo object.</h5>
 <h5> &#128308; For avoiding any google account security error (or anyother email hosting service), go to your account setting and enable "Access to a less secure app".</h5>
 
-<br><br><h3> Developed by <a href="https://www.instagram.com/rezafirouzi01/?hl=en">Reza Firouzi</a></h3>
+<br><br><h3> Developed by <a href="https://www.linkedin.com/in/rezafirouzi/">Reza Firouzi</a></h3>
